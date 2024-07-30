@@ -1,4 +1,4 @@
-version: '3.8'
+version: '1.29.2'
 
 networks:
   inception:
@@ -26,11 +26,15 @@ services:
       - inception
     volumes:
       - mariadb_data:/var/lib/mysql
+    restart: unless-stopped
+    env_file: 
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - 3306
 
   wordpress:
     container_name: wordpress
@@ -41,11 +45,26 @@ services:
       - inception
     volumes:
       - wordpress_data:/var/www/html
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      WORDPRESS_DB_HOST: maria_db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_PORT: ${WORDPRESS_DB_PORT}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WP_URL: ${WP_URL}
+      WP_TITLE: ${WP_TITLE}
+      WP_ADMIN_USER: ${WP_ADMIN_USER}
+      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+      DB_HOST: ${WORDPRESS_DB_HOST}
+      DB_NAME: ${WORDPRESS_DB_NAME}
+      DB_USER: ${WORDPRESS_DB_USER}
+      DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    expose:
+      - 9000
 
   nginx:
     container_name: nginx
@@ -58,3 +77,4 @@ services:
       - wordpress_data:/var/www/html
     ports:
       - "80:80"
+    restart: unless-stopped
