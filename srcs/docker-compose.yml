@@ -1,33 +1,36 @@
-version: '1.29.2'
+version: '3.7'
 
 networks:
   inception:
     driver: bridge
+    name: inception
 
 volumes:
   wordpress_data:
     driver: local
+    name: wordpress
     driver_opts:
       o: bind
       type: none
       device: ${HOME}/wordpress
   mariadb_data:
     driver: local
+    name: mariadb
     driver_opts:
       o: bind
       type: none
       device: ${HOME}/mariadb
 
 services:
-  maria_db:
-    container_name: maria_db
+  mariadb:
+    container_name: mariadb
     build: ./requirements/mariadb
     networks:
       - inception
     volumes:
       - mariadb_data:/var/lib/mysql
-    restart: unless-stopped
-    env_file: 
+    restart: on-failure
+    env_file:
       - .env
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -40,17 +43,16 @@ services:
     container_name: wordpress
     build: ./requirements/wordpress
     depends_on:
-      - maria_db
+      - mariadb
     networks:
       - inception
     volumes:
       - wordpress_data:/var/www/html
-    restart: unless-stopped
+    restart: on-failure
     env_file:
       - .env
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
-      WORDPRESS_DB_PORT: ${WORDPRESS_DB_PORT}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
@@ -59,10 +61,9 @@ services:
       WP_ADMIN_USER: ${WP_ADMIN_USER}
       WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
       WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
-      DB_HOST: ${WORDPRESS_DB_HOST}
-      DB_NAME: ${WORDPRESS_DB_NAME}
-      DB_USER: ${WORDPRESS_DB_USER}
-      DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WP_VIWER_USER: ${WP_VIWER_USER}
+      WP_VIWER_EMAIL: ${WP_VIWER_EMAIL}
+      WP_VIWER_PASSWORD: ${WP_VIWER_PASSWORD}
     expose:
       - 9000
 
@@ -71,10 +72,12 @@ services:
     build: ./requirements/nginx
     depends_on:
       - wordpress
+      - mariadb
     networks:
       - inception
     volumes:
       - wordpress_data:/var/www/html
     ports:
+      - "443:443"
       - "80:80"
-    restart: unless-stopped
+    restart: on-failure
