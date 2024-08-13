@@ -17,7 +17,6 @@ until check_db; do
   sleep 5
 done
 
-sudo -u www-data wp core download --path=/var/www/html --locale=pt_BR
 
 sudo -u www-data wp config create \
     --path=/var/www/html \
@@ -38,11 +37,11 @@ sudo -u www-data wp core install \
 
 # Adicionar um novo usuário não administrativo
 sudo -u www-data wp user create \
-    ${WP_NO_ADMIN_USER} ${WP_NO_ADMIN_EMAIL} \
-    --path=/var/www/html \
-    --user_pass=${WP_NO_ADMIN_PASSWORD} \
-    --role=subscriber
+    "${WP_VIWER_USER}" "${WP_VIWER_EMAIL}" \
+    --role=subscriber \
+    --user_pass="${WP_VIWER_PASSWORD}" \
+    --path=/var/www/html
 
 chown -R www-data:www-data /var/www/html
+exec php-fpm8.2 -R -F
 
-exec php-cgi -b 0.0.0.0:9000
