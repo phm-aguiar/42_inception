@@ -1,10 +1,10 @@
-FROM debian:latest
+FROM debian:bookworm
+
 
 RUN apt-get update && apt-get install -y mariadb-server
 
-COPY ./tools/setup_db.sh /tmp/setup_db.sh
-RUN chmod +x /tmp/setup_db.sh && bash /tmp/setup_db.sh
+COPY ./config/mdb.sh /mdb.sh
 
-COPY ./conf/my.cnf /etc/mysql/my.cnf
+RUN chmod +x /mdb.sh
 
-CMD ["mysqld_safe"]
+ENTRYPOINT ["./mdb.sh"]
