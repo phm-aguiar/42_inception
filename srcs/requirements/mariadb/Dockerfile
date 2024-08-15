@@ -1,9 +1,12 @@
-FROM debian:bookworm
+FROM debian:oldstable
 
 
-RUN apt-get update && apt-get install -y mariadb-server
+RUN apt-get update && apt-get install -y mariadb-server \
+    && mkdir -p /var/run/mysqld && \
+    chown -R mysql:mysql /var/run/mysqld && \
+    chmod 777 /var/run/mysqld
 
-COPY ./config/mdb.sh /mdb.sh
+COPY ./conf/mdb.sh /mdb.sh
 
 RUN chmod +x /mdb.sh
 

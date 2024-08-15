@@ -16,9 +16,8 @@ until check_db; do
   echo "Aguardando o banco de dados estar disponível..."
   sleep 5
 done
-
-
-sudo -u www-data wp config create \
+wp config create \
+    --allow-root \
     --path=/var/www/html \
     --dbname=${WORDPRESS_DB_NAME} \
     --dbuser=${WORDPRESS_DB_USER} \
@@ -26,8 +25,8 @@ sudo -u www-data wp config create \
     --dbhost=${WORDPRESS_DB_HOST} \
     --locale=pt_BR
 
-# Instalar o WordPress
-sudo -u www-data wp core install \
+wp core install \
+    --allow-root \
     --path=/var/www/html \
     --url=${WP_URL} \
     --title="${WP_TITLE}" \
@@ -35,13 +34,12 @@ sudo -u www-data wp core install \
     --admin_password=${WP_ADMIN_PASSWORD} \
     --admin_email=${WP_ADMIN_EMAIL}
 
-# Adicionar um novo usuário não administrativo
-sudo -u www-data wp user create \
+wp user create \
+    --allow-root \
     "${WP_VIWER_USER}" "${WP_VIWER_EMAIL}" \
     --role=subscriber \
     --user_pass="${WP_VIWER_PASSWORD}" \
     --path=/var/www/html
 
-chown -R www-data:www-data /var/www/html
-exec php-fpm8.2 -R -F
+exec php-fpm7.4 -F
 

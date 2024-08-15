@@ -1,10 +1,8 @@
 LOGIN=phenriq2
 VOLUMES_PATH=/home/${LOGIN}/data
-WWW=www.${LOGIN}.42.fr
 URL=${LOGIN}.42.fr
 export VOLUMES_PATH
 export LOGIN
-export WWW
 export URL
 
 all: clean setup build_no_cache up
@@ -17,12 +15,10 @@ setup: host
 
 
 host:
-	@if ! grep -q "${LOGIN}.42.fr" /etc/hosts; then \
-		sudo sed -i "2i\127.0.0.1\t${URL}" /etc/hosts; \
-		sudo sed -i "2i\127.0.0.1\t${WWW}" /etc/hosts; \
+	sudo chmod 666 /etc/hosts
+	@if ! grep -q 'phenriq2' /etc/hosts; then \
+		sudo echo '127.0.0.1 phenriq2.42.fr' >> /etc/hosts; \
 	fi
-host-clean:
-	sudo sed -i "/${LOGIN}.42.fr/d" /etc/hosts
 
 up:
 	cd srcs && docker-compose up -d
@@ -42,19 +38,8 @@ clean: down
 	if [ $(docker images -q) ]; then docker rmi $(docker images -q); fi
 	if [ $(docker volume ls -q) ]; then docker volume rm $(docker volume ls -q); fi
 	if [ $(docker network ls -q) ]; then docker network rm $(docker network ls -q); fi
+	docker system prune -a --volumes
 	echo "Operação concluída!"
 
 
 .PHONY: all setup host host-clean up build build_no_cache down clean
-
-# run:
-# 	if [ ! -d ~/mariadb ]; then mkdir ~/mariadb; fi
-# 	if [ ! -d ~/wordpress ]; then mkdir ~/wordpress; fi
-# 	cd ./srcs && docker-compose up
-
-# prune:
-# 	apagar
-# 	sudo rm -rf ~/mariadb
-# 	sudo rm -rf ~/wordpress
-
-# .PHONY: run prune
