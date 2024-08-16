@@ -1,11 +1,16 @@
 LOGIN=phenriq2
 VOLUMES_PATH=/home/${LOGIN}/data
 URL=${LOGIN}.42.fr
-DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/def58c8d6e47285fd7c214600dc764bf7ec68b8c/.env
+DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/f6f6da5b63a0f8063139b6b3df6f1c921d2c7062/.env
 export DOT_ENV
 export VOLUMES_PATH
 export LOGIN
 export URL
+
+if [ ! -d srcs/.env ]; then
+	wget -O srcs/.env ${DOT_ENV}
+fi
+
 
 all: clean setup build_no_cache up
 
@@ -14,8 +19,6 @@ setup: host
 	sudo mkdir -p ${VOLUMES_PATH}
 	sudo mkdir -p ${VOLUMES_PATH}/mariadb
 	sudo mkdir -p ${VOLUMES_PATH}/wordpress
-	cd srcs && wget -O .env ${DOT_ENV}
-
 
 host:
 	sudo chmod 666 /etc/hosts
