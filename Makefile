@@ -1,7 +1,7 @@
 LOGIN=phenriq2
 VOLUMES_PATH=/home/${LOGIN}/data
 URL=${LOGIN}.42.fr
-DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/f6f6da5b63a0f8063139b6b3df6f1c921d2c7062/.env
+DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/556497b33b76481e4f44ba0bf577df5818361a36/.env
 export DOT_ENV
 export VOLUMES_PATH
 export LOGIN
