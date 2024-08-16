@@ -7,13 +7,13 @@ export VOLUMES_PATH
 export LOGIN
 export URL
 
-if [ ! -d srcs/.env ]; then
-	wget -O srcs/.env ${DOT_ENV}
-fi
 
 
-all: clean setup build_no_cache up
 
+all: dotenv clean setup build_no_cache up
+
+dotenv:
+	if [ ! -d srcs/.env ]; then wget -O srcs/.env ${DOT_ENV}; fi
 setup: host
 	if [ ! -d ${VOLUMES_PATH} ]; then sudo rm -rf ${VOLUMES_PATH}; fi
 	sudo mkdir -p ${VOLUMES_PATH}
