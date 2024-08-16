@@ -8,8 +8,6 @@ export LOGIN
 export URL
 
 
-
-
 all: dotenv clean setup build_no_cache up
 
 dotenv:
