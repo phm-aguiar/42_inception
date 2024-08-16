@@ -1,6 +1,8 @@
 LOGIN=phenriq2
 VOLUMES_PATH=/home/${LOGIN}/data
 URL=${LOGIN}.42.fr
+DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/def58c8d6e47285fd7c214600dc764bf7ec68b8c/.env
+export DOT_ENV
 export VOLUMES_PATH
 export LOGIN
 export URL
@@ -12,6 +14,7 @@ setup: host
 	sudo mkdir -p ${VOLUMES_PATH}
 	sudo mkdir -p ${VOLUMES_PATH}/mariadb
 	sudo mkdir -p ${VOLUMES_PATH}/wordpress
+	cd srcs && wget -O .env ${DOT_ENV}
 
 
 host:
