@@ -1,49 +1,61 @@
 LOGIN=phenriq2
 VOLUMES_PATH=/home/${LOGIN}/data
-URL=${LOGIN}.42.fr
-DOT_ENV=https://gist.githubusercontent.com/phm-aguiar/6db4a76cb7a84fed899d42bcd2d85322/raw/556497b33b76481e4f44ba0bf577df5818361a36/.env
-export DOT_ENV
+
 export VOLUMES_PATH
 export LOGIN
-export URL
 
+SYSTEM_USER = $(shell echo $$USER)
+DOCKER_CONFIG = $(shell echo $$HOME/.docker)
 
-all: dotenv clean setup build_no_cache up
+all: setup up
+#  host configuration
+host:
+	@if ! grep -q "${LOGIN}.42.fr" /etc/hosts; then \
+		sudo sed -i "2i\127.0.0.1\t${LOGIN}.42.fr" /etc/hosts; \
+	fi
+host-clean:
+	sudo sed -i "/${LOGIN}.42.fr/d" /etc/hosts
+# 
+DOCKER_COMPOSE_FILE=./srcs/docker-compose.yml
+DOCKER_COMPOSE_COMMAND=docker-compose -f $(DOCKER_COMPOSE_FILE)
 
-dotenv:
-	if [ ! -d srcs/.env ]; then wget -O srcs/.env ${DOT_ENV}; fi
+up: build
+	$(DOCKER_COMPOSE_COMMAND) up -d
+
+build:
+	$(DOCKER_COMPOSE_COMMAND) build
+
+build-no-cache:
+	$(DOCKER_COMPOSE_COMMAND) build --no-cache
+
+down:
+	$(DOCKER_COMPOSE_COMMAND) down
+
+ps:
+	$(DOCKER_COMPOSE_COMMAND) ps
+
+ls:
+	docker volume ls
+
+clean: host-clean
+	$(DOCKER_COMPOSE_COMMAND) down --rmi all --volumes
+
+reset:
+	docker stop $$(docker ps -qa)
+	docker rm $$(docker ps -qa)
+	docker rmi -f $$(docker images -qa)
+	docker volume rm $$(docker volume ls -q)
+	docker network rm $$(docker network ls -q) 2>/dev/null
+
+fclean: clean
+	docker system prune --force --all --volumes
+	sudo rm -rf /home/${LOGIN}
+
 setup: host
-	if [ ! -d ${VOLUMES_PATH} ]; then sudo rm -rf ${VOLUMES_PATH}; fi
-	sudo mkdir -p ${VOLUMES_PATH}
 	sudo mkdir -p ${VOLUMES_PATH}/mariadb
 	sudo mkdir -p ${VOLUMES_PATH}/wordpress
 
-host:
-	sudo chmod 666 /etc/hosts
-	@if ! grep -q 'phenriq2' /etc/hosts; then \
-		sudo echo '127.0.0.1 phenriq2.42.fr' >> /etc/hosts; \
-	fi
-
-up:
-	cd srcs && docker-compose up -d
-build:
-	cd srcs && docker-compose build
-
-build_no_cache:
-	cd srcs && docker-compose build --no-cache
-
-down:
-	cd srcs && docker-compose down
-
-clean: down
-	if [ -d ${VOLUMES_PATH} ]; then sudo rm -rf ${VOLUMES_PATH}; fi
-	if [ $(docker ps -q) ]; then docker stop $(docker ps -q); fi
-	if [ $(docker ps -aq) ]; then docker rm $(docker ps -aq); fi
-	if [ $(docker images -q) ]; then docker rmi $(docker images -q); fi
-	if [ $(docker volume ls -q) ]; then docker volume rm $(docker volume ls -q); fi
-	if [ $(docker network ls -q) ]; then docker network rm $(docker network ls -q); fi
-	docker system prune -a --volumes
-	echo "Operação concluída!"
+prepare:	update compose
 
 
-.PHONY: all setup host host-clean up build build_no_cache down clean
+.PHONY: all up build build-no-cache down ps ls clean fclean setup host update compose prepare
