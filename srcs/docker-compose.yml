@@ -81,17 +81,3 @@ services:
       WP_VIWER_PASSWORD: ${WP_VIWER_PASSWORD}
     expose:
       - 9000
-
-  nginx:
-    container_name: nginx
-    build: ./requirements/nginx
-    depends_on:
-      - wordpress
-      - mariadb
-    networks:
-      - inception
-    volumes:
-      - wordpress_data:/var/www/html
-    ports:
-      - "443:443"
-    restart: on-failure
